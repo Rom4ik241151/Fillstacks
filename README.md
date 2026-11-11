@@ -70,9 +70,9 @@ Late buildings look useless at base payback. They become worth buying once the g
 * `<script src="/sdk.js">` and `YaGames.init()` inside the `YandexPlatform` implementation. A `StubPlatform` with the same API (`init, showRewarded, showInterstitial, save, load, getLang, gameplayStart, gameplayStop, ready`) is used automatically when the SDK is missing (local debug, fake 1 s "ad" overlay).
 * `LoadingAPI.ready()` is called exactly once, after the save is loaded and the first frame is ready.
 * `GameplayAPI.start()/stop()` follow the real state: stopped for modals/menus, ads, hidden tab or lost focus, and SDK `game_api_pause`.
-* Language comes from `ysdk.environment.i18n.lang` (ru/be/kk/uk/uz → ru, everything else → en) and can be overridden in Settings.
+* **Language (requirement 2.14):** detected from `ysdk.environment.i18n.lang` on **every launch** (ru/be/kk/uk/uz → ru, all other codes → en). The manual RU/EN switch in Settings lasts only for the current session and is never saved, so a stored choice can't override the SDK. The loading screen shows no text until the language is known. Locally, `?lang=ru` / `?lang=en` simulates the platform language.
 * Saves go to `player.setData/getData` (throttled to once per 30 s, forced on prestige/hide) with a localStorage backup. The newer save wins. Each save is versioned (`saveVersion`) and passed through migrations, then deep-merged with defaults and sanitized (NaN, Infinity, negatives, unknown ids).
-* Rewarded ads use `showRewardedVideo`, and the reward is applied **only in `onRewarded`**. Errors show a polite toast. Ad rewards are deliberately modest (`CONFIG.ads`): x1.5 income for 30 min (stacks up to 2 h, 15 min cooldown), 10 min of income instantly (10 min cooldown), summon a golden slime (15 min cooldown), bring back a missed slime (10 min cooldown), offline reward x1.5, one extra daily task. The Bonuses window shows current income, the exact reward, its cooldown and the time left.
+* Rewarded ads use `showRewardedVideo`, and the reward is applied **only in `onRewarded`**. Errors show a polite toast. Ad rewards have **no cooldown** (`CONFIG.ads`): every boost view adds +30 min of x1.5 income to one shared timer with no upper limit (a 30-day cap exists only to reject corrupted saves). There's also 10 min of income instantly, summon a golden slime, bring back a missed slime, offline reward x1.5 and one extra daily task. The Bonuses window shows current income, the stacked boost time, the number of boost views and total ads watched (also in Statistics).
 * Fullscreen ads use `showFullscreenAdv` at most once per 3.5 min, never in the first 3 min, and only after prestige or closing the offline window.
 * Sound and the game loop pause during ads, on `visibilitychange`/`blur`, and resume afterwards. Missed time is credited through the offline logic.
 * Context menu, text selection, drag, double-tap and pinch zoom are disabled.
@@ -92,7 +92,8 @@ python3 -m http.server 8080   # then open http://localhost:8080
 - [ ] Rewarded ads: each of the 6 buttons pays out only after a full view. Closing early gives no reward. Sound is muted during the ad.
 - [ ] Fullscreen ads are not shown more than once per ~3.5 min and never right after a tap/purchase.
 - [ ] Minimize the tab or switch apps: music stops, and the game resumes correctly (offline window after >60 s).
-- [ ] Language: open the draft with `?lang=en` and `?lang=ru`. No mixed-language strings.
+- [ ] **"Game translated into" (Draft tab): select only Russian and English.** Moderation opens the game in every declared language (Debug panel → SDK mocks ⚒️ → language). Any declared language that doesn't fully switch gets the game rejected. Declare more languages only after translations for them are added to `I18N`.
+- [ ] Language: in the Debug panel, switch SDK mocks to Ru, then En, and confirm every screen (tabs, settings, bonuses, trees, offline/login windows, toasts) is fully in that language.
 - [ ] Cloud save: play, reload on another device/browser with the same account, and confirm progress is restored.
 - [ ] Mobile portrait (360×640 and 390×844) and desktop (1280×720): no cut-off buttons, no page scrolling, no zoom on double tap.
 - [ ] No `alert/confirm/prompt`, no external requests (check the Network tab), no errors in the console.

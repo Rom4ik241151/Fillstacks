@@ -179,12 +179,11 @@ const CONFIG = {
   ads: {
     interMinSec: 210,       // полноэкранная не чаще раза в 3.5 мин
     interFirstSec: 180,     // и не раньше 3 мин после старта
-    // награды за рекламу намеренно скромные, чтобы не ломать темп игры
-    boost: { mult: 1.5, minutes: 30, maxMinutes: 120, cd: 900 },
-    instant: { minutes: 10, minMoney: 500, cd: 600 },
-    summon: { cd: 900 },
-    restore: { cd: 600 },
+    // без перезарядки: каждый просмотр добавляет время к общему бусту
+    boost: { mult: 1.5, minutes: 30 },
+    instant: { minutes: 10, minMoney: 500 },
     offlineMult: 1.5,
+    safetyCapDays: 30,      // только защита от битых сохранений
   },
 
   tutorialSec: 60,
@@ -405,17 +404,17 @@ const I18N = {
     st_pps: 'Доход в секунду', st_mult: 'Множитель престижа', st_taps: 'Тапов', st_golden: 'Золотых слизней',
     st_buys: 'Куплено зданий', st_rebirths: 'Перерождений (всего)', st_asc: 'Вознесений (всего)', st_awak: 'Пробуждений',
     st_mut: 'Мутагена в этом вознесении', st_moon: 'Лунных камней получено', st_runes: 'Рун получено', st_ach: 'Достижений',
-    st_combo: 'Макс. комбо', st_streak: 'Серия входов',
+    st_combo: 'Макс. комбо', st_streak: 'Серия входов', st_ads: 'Просмотрено рекламы',
     sound: 'Звуки', music: 'Музыка', language: 'Язык', on: 'Вкл', off: 'Выкл',
     reset: 'Сбросить прогресс', reset_q: 'Точно удалить весь прогресс? Это нельзя отменить!', reset_q2: 'Совсем-совсем точно? Монстры будут грустить 😢',
     reset_done: 'Прогресс сброшен', yes: 'Да', no: 'Нет', cancel: 'Отмена', ok: 'Ок', close: 'Закрыть', open_settings: 'Настройки',
     ads_title: 'Бонусы', ads_intro: 'Посмотрите рекламу по желанию — монстры скажут спасибо!',
-    ad_boost: 'Доход x{m} на {t}', ad_boost_desc: 'Время суммируется, максимум {t}', ad_instant: 'Мгновенная награда',
+    ad_boost: 'Доход x{m}: +{t} за просмотр', ad_boost_desc: 'Каждый просмотр добавляет {t} к общему бусту', ad_instant: 'Мгновенная награда',
     ad_instant_desc: 'Доход за {m} мин: {v}', ad_summon: 'Позвать золотого слизня', ad_summon_desc: 'Появится сразу: x{f} на {s} с или доход за {i} мин',
-    ad_watch: '▶ Смотреть', ad_cd: 'через {t}', ad_unavailable: 'Реклама сейчас недоступна. Попробуйте чуть позже 🙏',
+    ad_watch: '▶ Смотреть', ad_unavailable: 'Реклама сейчас недоступна. Попробуйте чуть позже 🙏',
     ad_no_reward: 'Награда выдаётся только за полный просмотр', ad_thanks: 'Спасибо! Награда получена 🎉',
-    ad_income: 'Ваш доход: {v}/сек · множитель сейчас x{m}', ad_cd_info: '⏱ Перезарядка: {t}',
-    ad_ready_in: '⏳ Доступно через {t}', ad_active: '⚡ Активно: x{m} ещё {t}',
+    ad_income: 'Ваш доход: {v}/сек · множитель сейчас x{m}', ad_active: '⚡ Накоплено: x{m} ещё {t}',
+    ad_boost_count: '📺 Просмотров для буста: {n}', ad_total: '📺 Всего просмотров рекламы: {n}',
     boost_left: 'x{m} ещё {t}',
     menu_hide: 'Свернуть меню', menu_show: 'Открыть меню',
     off_title: 'Пока вас не было', off_text: 'Монстры трудились {t} и накопили:', off_claim: 'Забрать', off_claim2: '▶ Забрать x{m}',
@@ -539,17 +538,17 @@ const I18N = {
     st_pps: 'Income per second', st_mult: 'Prestige multiplier', st_taps: 'Taps', st_golden: 'Golden slimes',
     st_buys: 'Buildings bought', st_rebirths: 'Rebirths (total)', st_asc: 'Ascensions (total)', st_awak: 'Awakenings',
     st_mut: 'Mutagen this ascension', st_moon: 'Moonstones earned', st_runes: 'Runes earned', st_ach: 'Achievements',
-    st_combo: 'Max combo', st_streak: 'Login streak',
+    st_combo: 'Max combo', st_streak: 'Login streak', st_ads: 'Ads watched',
     sound: 'Sounds', music: 'Music', language: 'Language', on: 'On', off: 'Off',
     reset: 'Reset progress', reset_q: 'Delete all progress? This cannot be undone!', reset_q2: 'Really, really sure? The monsters will be sad 😢',
     reset_done: 'Progress reset', yes: 'Yes', no: 'No', cancel: 'Cancel', ok: 'OK', close: 'Close', open_settings: 'Settings',
     ads_title: 'Bonuses', ads_intro: 'Watch an ad if you like — the monsters will thank you!',
-    ad_boost: 'Income x{m} for {t}', ad_boost_desc: 'Time stacks, up to {t}', ad_instant: 'Instant reward',
+    ad_boost: 'Income x{m}: +{t} per view', ad_boost_desc: 'Each view adds {t} to the total boost', ad_instant: 'Instant reward',
     ad_instant_desc: '{m} min of income: {v}', ad_summon: 'Summon a golden slime', ad_summon_desc: 'Appears now: x{f} for {s} s or {i} min of income',
-    ad_watch: '▶ Watch', ad_cd: 'in {t}', ad_unavailable: 'Ads are unavailable right now. Please try again later 🙏',
+    ad_watch: '▶ Watch', ad_unavailable: 'Ads are unavailable right now. Please try again later 🙏',
     ad_no_reward: 'The reward is given only for a full view', ad_thanks: 'Thanks! Reward received 🎉',
-    ad_income: 'Your income: {v}/sec · current multiplier x{m}', ad_cd_info: '⏱ Cooldown: {t}',
-    ad_ready_in: '⏳ Available again in {t}', ad_active: '⚡ Active: x{m} for {t}',
+    ad_income: 'Your income: {v}/sec · current multiplier x{m}', ad_active: '⚡ Stacked: x{m} for {t}',
+    ad_boost_count: '📺 Boost views: {n}', ad_total: '📺 Total ads watched: {n}',
     boost_left: 'x{m} for {t}',
     menu_hide: 'Hide menu', menu_show: 'Open menu',
     off_title: 'While you were away', off_text: 'Your monsters worked for {t} and collected:', off_claim: 'Claim', off_claim2: '▶ Claim x{m}',
@@ -644,9 +643,8 @@ function newState() {
     runes: 0, runesTotal: 0, awakenings: 0, tree3: {},
     ach: {},
     stats: { taps: 0, golden: 0, buys: 0, upgrades: 0, playTime: 0, runTime: 0, maxCombo: 1,
-      rebirthsAll: 0, ascAll: 0, comboMaxed: 0, startedAt: Date.now() },
+      rebirthsAll: 0, ascAll: 0, comboMaxed: 0, startedAt: Date.now(), ads: 0, adBoosts: 0 },
     boosts: { adUntil: 0, weeklyUntil: 0, frenzyLeft: 0, frenzyMult: 1 },
-    adCd: { boost: 0, instant: 0, summon: 0, restore: 0 },
     daily: { day: -1, tasks: [], extra: false },
     weekly: { week: -1, type: '', target: 0, progress: 0, claimed: false },
     login: { last: -1, streak: 0 },
@@ -718,16 +716,16 @@ function sanitizeState(s) {
   });
   s.daily.tasks = s.daily.tasks.slice(0, CONFIG.daily.count + 1).map(sanitizeTask).filter(Boolean);
   if (s.weekly.type && !CONFIG.weekly.templates.some(tp => tp.type === s.weekly.type)) s.weekly.week = -1;
-  if (s.settings.lang && !I18N[s.settings.lang]) s.settings.lang = '';
   // удаляем узлы, которых нет в конфиге
   [['tree1', CONFIG.tree1], ['tree2', CONFIG.tree2], ['tree3', CONFIG.tree3]].forEach(([k, tree]) => {
     for (const id of Object.keys(s[k])) if (!tree.some(n => n.id === id)) delete s[k][id];
   });
   s.golden.next = U.clamp(s.golden.next, 1, CONFIG.golden.maxSec * 2);
   s.boosts.frenzyLeft = U.clamp(s.boosts.frenzyLeft, 0, 600);
-  // старые сохранения могли накопить буст до 24 ч — обрезаем под новые лимиты
-  const adCap = Date.now() + CONFIG.ads.boost.maxMinutes * 60e3 + CONFIG.login.day7BoostHours * 3600e3;
+  // защита от мусора в сохранении (буст копится без лимита)
+  const adCap = Date.now() + CONFIG.ads.safetyCapDays * 86400e3;
   s.boosts.adUntil = Math.min(s.boosts.adUntil, adCap);
+  s.settings.lang = ''; // язык всегда берётся из SDK при запуске
   s.v = CONFIG.saveVersion;
   return s;
 }
@@ -768,16 +766,21 @@ const Save = {
 
 // ===================== PLATFORM: Яндекс SDK + заглушка =====================
 const RU_LANGS = ['ru', 'be', 'kk', 'uk', 'uz'];
+// коды Яндекса (ISO 639-1) → язык перевода; ru и en — полные переводы
 function langFrom(code) {
   const l = String(code || 'en').slice(0, 2).toLowerCase();
   return RU_LANGS.includes(l) ? 'ru' : 'en';
 }
 
-// Заглушка для локальной отладки (без SDK)
+// Заглушка для локальной отладки (без SDK); ?lang=ru|en имитирует язык платформы
 const StubPlatform = {
   name: 'local',
   async init() {},
-  getLang() { return langFrom(typeof navigator !== 'undefined' ? navigator.language : 'en'); },
+  getLang() {
+    let q = null;
+    try { q = new URLSearchParams(location.search).get('lang'); } catch (e) { q = null; }
+    return langFrom(q || (typeof navigator !== 'undefined' ? navigator.language : 'en'));
+  },
   ready() {}, gameplayStart() {}, gameplayStop() {},
   showRewarded(cb) {
     cb.onOpen();
@@ -1876,8 +1879,8 @@ const UI = {
     };
     document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('badge', !!has[b.dataset.tab]));
     $('menu-toggle').classList.toggle('badge', !S.settings.menuOpen && Object.values(has).some(Boolean));
-    const adReady = ['boost', 'instant', 'summon'].some(k => Ads.cdLeft(k) <= 0);
-    $('btn-ads').classList.toggle('badge', adReady);
+    // точка на «Бонусах» — только когда буст за рекламу не активен
+    $('btn-ads').classList.toggle('badge', S.boosts.adUntil <= Date.now());
   },
 
   // ---------------- вкладки ----------------
@@ -2080,7 +2083,7 @@ const UI = {
           for (const a of Meta.list) h += `<button class="ach ${S.ach[a.id] ? 'got' : ''}" data-act="ach" data-id="${a.id}">${a.icon}</button>`;
           h += `</div>`;
         } else if (UI.moreSub === 'stats') {
-          h += `<div class="card col stats">` + ['play', 'run', 'total', 'runEarned', 'pps', 'mult', 'taps', 'golden', 'buys', 'rebirths', 'asc', 'awak', 'mut', 'moon', 'runes', 'ach', 'combo', 'streak']
+          h += `<div class="card col stats">` + ['play', 'run', 'total', 'runEarned', 'pps', 'mult', 'taps', 'golden', 'buys', 'rebirths', 'asc', 'awak', 'mut', 'moon', 'runes', 'ach', 'combo', 'streak', 'ads']
             .map(k => `<div class="srow"><span>${t('st_' + k)}</span><b data-k="st_${k}"></b></div>`).join('') + `</div>`;
         } else h += UI.settingsHtml();
         return h;
@@ -2094,7 +2097,7 @@ const UI = {
           st_taps: Fmt.num(S.stats.taps), st_golden: Fmt.num(S.stats.golden), st_buys: Fmt.num(S.stats.buys),
           st_rebirths: Fmt.num(S.stats.rebirthsAll), st_asc: Fmt.num(S.stats.ascAll), st_awak: Fmt.num(S.awakenings),
           st_mut: Fmt.num(S.mutagenTotal), st_moon: Fmt.num(S.moonTotal), st_runes: Fmt.num(S.runesTotal),
-          st_ach: Object.keys(S.ach).length + ' / ' + Meta.list.length, st_combo: 'x' + S.stats.maxCombo.toFixed(2), st_streak: String(S.login.streak),
+          st_ach: Object.keys(S.ach).length + ' / ' + Meta.list.length, st_combo: 'x' + S.stats.maxCombo.toFixed(2), st_streak: String(S.login.streak), st_ads: Fmt.num(S.stats.ads),
         };
       },
     },
@@ -2179,10 +2182,10 @@ const UI = {
       case 'snd': S.settings.sound = !S.settings.sound; SFX.applySettings(); this.rerenderSettings(); break;
       case 'mus': S.settings.music = !S.settings.music; SFX.init(); SFX.applySettings(); this.rerenderSettings(); break;
       case 'lang': {
+        // ручной выбор — только на текущую сессию, при запуске язык снова из SDK
         const inModal = this.modal && this.modal.kind === 'settings';
-        S.settings.lang = d.l; I18n.set(d.l); this.applyStatic(); this.render();
+        I18n.set(d.l); this.applyStatic(); this.render();
         if (inModal) { this.closeModal(); this.settingsModal(); }
-        Save.save();
         break;
       }
       case 'reset': this.confirm(t('reset_q'), () => setTimeout(() => this.confirm(t('reset_q2'), () => Game.resetAll()), 50)); break;
@@ -2237,8 +2240,8 @@ const UI = {
     const A = CONFIG.ads, G = CONFIG.golden;
     const row = (kind, icon, title, desc) => `<div class="card adrow"><div class="ico sm" style="--c:#ffd166">${icon}</div>
       <div class="info"><div class="name">${title}</div><div class="desc" data-k="${kind}d">${desc}</div>
-      <div class="desc small adinfo" data-k="${kind}i"></div><div class="bar cd"><i data-k="${kind}bar"></i></div></div>
-      <button class="buy ad" data-act="ad" data-kind="${kind}" data-k="${kind}btn"><span class="n" data-k="${kind}lbl"></span></button></div>`;
+      <div class="desc small adinfo" data-k="${kind}i"></div></div>
+      <button class="buy ad" data-act="ad" data-kind="${kind}" data-k="${kind}btn"><span class="n">${t('ad_watch')}</span></button></div>`;
     this.openModal({
       kind: 'ads', title: '🎁 ' + t('ads_title'),
       html: `<p class="mtext">${t('ads_intro')}</p><p class="desc center adincome" data-k="adinc"></p>` +
@@ -2248,16 +2251,13 @@ const UI = {
       vals() {
         const v = {}, c = Economy.get();
         v.adinc = t('ad_income', { v: Fmt.num(c.pps, 1), m: Fmt.mult(c.temp) });
-        ['boost', 'instant', 'summon'].forEach(k => {
-          const left = Ads.cdLeft(k), cd = A[k].cd;
-          v[k + 'lbl'] = left > 0 ? t('ad_cd', { t: Fmt.time(left) }) : t('ad_watch');
-          v[k + 'btn'] = { off: left > 0 || Ads.busy };
-          v[k + 'bar'] = { w: 1 - left / cd };
-          v[k + 'i'] = left > 0 ? t('ad_ready_in', { t: Fmt.time(left) }) : t('ad_cd_info', { t: Fmt.time(cd) });
-        });
+        ['boost', 'instant', 'summon'].forEach(k => { v[k + 'btn'] = { off: Ads.busy }; });
+        const bl = Math.max(0, (S.boosts.adUntil - Date.now()) / 1000);
+        v.boostd = bl > 0 ? t('ad_active', { m: A.boost.mult, t: Fmt.time(bl) }) : t('ad_boost_desc', { t: Fmt.time(A.boost.minutes * 60) });
+        v.boosti = t('ad_boost_count', { n: S.stats.adBoosts });
         v.instantd = t('ad_instant_desc', { m: A.instant.minutes, v: cur(Economy.incomeFor(A.instant.minutes, A.instant.minMoney)) });
-        const bl = (S.boosts.adUntil - Date.now()) / 1000;
-        v.boostd = bl > 0 ? t('ad_active', { m: A.boost.mult, t: Fmt.time(bl) }) : t('ad_boost_desc', { t: Fmt.time(A.boost.maxMinutes * 60) });
+        v.instanti = t('ad_total', { n: S.stats.ads });
+        v.summoni = '';
         return v;
       },
     });
@@ -2346,9 +2346,13 @@ const UI = {
   toastFns: {}, toastSeq: 0,
   toast(html, o = {}) {
     const box = $('toasts');
+    // одинаковые тосты подряд не копим (например, после серии просмотров рекламы)
+    const last = box.lastElementChild;
+    if (last && !o.btn && last.dataset.html === html) last.remove();
     while (box.children.length >= 4) box.firstChild.remove();
     const el = document.createElement('div');
     el.className = 'toast ' + (o.cls || '');
+    el.dataset.html = html;
     let btn = '';
     if (o.btn) { const id = 't' + (++this.toastSeq); this.toastFns[id] = o.btn.fn; btn = `<button class="tb" data-act="tbtn" data-id="${id}">${o.btn.label}</button>`; }
     el.innerHTML = `<div class="tt">${html}</div>${btn}`;
@@ -2378,18 +2382,16 @@ const UI = {
 // ===================== ADS: реклама только по желанию =====================
 const Ads = {
   busy: false, lastInter: Date.now(),
-  cdLeft(kind) { return Math.max(0, ((S.adCd[kind] || 0) - Date.now()) / 1000); },
-  // награда выдаётся строго в onRewarded
+  // награда выдаётся строго в onRewarded; перезарядки нет
   rewarded(kind, onReward) {
     if (this.busy) return;
-    if (kind in S.adCd && this.cdLeft(kind) > 0) { UI.toast(t('ad_cd', { t: Fmt.time(this.cdLeft(kind)) })); return; }
     this.busy = true;
     let got = false;
     Platform.showRewarded({
       onOpen: () => Game.setPause('ad', true),
       onRewarded: () => {
         got = true;
-        if (CONFIG.ads[kind] && CONFIG.ads[kind].cd) S.adCd[kind] = Date.now() + CONFIG.ads[kind].cd * 1000;
+        S.stats.ads++;
         try { onReward(); } catch (e) { /* награда не должна ронять игру */ }
       },
       onClose: () => {
@@ -2408,8 +2410,10 @@ const Ads = {
   byKind(kind, el) {
     if (kind === 'boost') {
       this.rewarded('boost', () => {
+        // время копится с каждым просмотром, без верхнего лимита
         const now = Date.now(), cfg = CONFIG.ads.boost;
-        S.boosts.adUntil = Math.min(now + cfg.maxMinutes * 60e3, Math.max(now, S.boosts.adUntil) + cfg.minutes * 60e3);
+        S.boosts.adUntil = Math.min(now + CONFIG.ads.safetyCapDays * 86400e3, Math.max(now, S.boosts.adUntil) + cfg.minutes * 60e3);
+        S.stats.adBoosts++;
         Economy.invalidate();
       });
     } else if (kind === 'instant') {
@@ -2488,7 +2492,6 @@ const Golden = {
   },
   miss() {
     this.remove();
-    if (Ads.cdLeft('restore') > 0) return;
     UI.toast('🥚 ' + t('gold_missed'), { dur: CONFIG.golden.restoreWindowSec,
       btn: { label: t('gold_restore'), fn: () => Ads.rewarded('restore', () => Golden.spawn()) } });
   },
@@ -2642,9 +2645,7 @@ const Game = {
     setTimeout(() => Ads.interstitial(), 1500); // естественная пауза
   },
   resetAll() {
-    const lang = S.settings.lang;
     S = newState();
-    S.settings.lang = lang;
     S.tutorial.done = true;
     Prestige.recalc(); Economy.invalidate();
     Meta.checkDay();
@@ -2695,7 +2696,10 @@ async function boot() {
   let loaded = null;
   try { loaded = await Save.load(); } catch (e) { loaded = null; }
   if (loaded) S = loaded;
-  I18n.set(S.settings.lang || Platform.getLang());
+  // п. 2.14: язык определяется через SDK при каждом запуске
+  I18n.set(Platform.getLang());
+  const ldt = $('ld-title');
+  if (ldt) ldt.textContent = t('title');
   Meta.build();
   Prestige.recalc();
   Economy.invalidate();
