@@ -179,11 +179,11 @@ const CONFIG = {
   ads: {
     interMinSec: 210,       // полноэкранная не чаще раза в 3.5 мин
     interFirstSec: 180,     // и не раньше 3 мин после старта
-    // без перезарядки: каждый просмотр добавляет время к общему бусту
-    boost: { mult: 1.5, minutes: 30 },
+    // общий банк буста: каждый просмотр +minutes, ёмкость bankHours; перезарядки нет
+    boost: { mult: 1.5, minutes: 30, bankHours: 4 },
+    // разовые награды — не копятся в банк
     instant: { minutes: 10, minMoney: 500 },
     offlineMult: 1.5,
-    safetyCapDays: 30,      // только защита от битых сохранений
   },
 
   tutorialSec: 60,
@@ -409,13 +409,15 @@ const I18N = {
     reset: 'Сбросить прогресс', reset_q: 'Точно удалить весь прогресс? Это нельзя отменить!', reset_q2: 'Совсем-совсем точно? Монстры будут грустить 😢',
     reset_done: 'Прогресс сброшен', yes: 'Да', no: 'Нет', cancel: 'Отмена', ok: 'Ок', close: 'Закрыть', open_settings: 'Настройки',
     ads_title: 'Бонусы', ads_intro: 'Посмотрите рекламу по желанию — монстры скажут спасибо!',
-    ad_boost: 'Доход x{m}: +{t} за просмотр', ad_boost_desc: 'Каждый просмотр добавляет {t} к общему бусту', ad_instant: 'Мгновенная награда',
+    ad_boost: 'Банк буста x{m}', ad_boost_desc: '+{t} за каждый просмотр · до {max}', ad_instant: 'Мгновенная награда',
     ad_instant_desc: 'Доход за {m} мин: {v}', ad_summon: 'Позвать золотого слизня', ad_summon_desc: 'Появится сразу: x{f} на {s} с или доход за {i} мин',
     ad_watch: '▶ Смотреть', ad_unavailable: 'Реклама сейчас недоступна. Попробуйте чуть позже 🙏',
     ad_no_reward: 'Награда выдаётся только за полный просмотр', ad_thanks: 'Спасибо! Награда получена 🎉',
-    ad_income: 'Ваш доход: {v}/сек · множитель сейчас x{m}', ad_active: '⚡ Накоплено: x{m} ещё {t}',
-    ad_boost_count: '📺 Просмотров для буста: {n}', ad_total: '📺 Всего просмотров рекламы: {n}',
-    boost_left: 'x{m} ещё {t}',
+    ad_income: 'Ваш доход: {v}/сек · множитель сейчас x{m}',
+    ad_bank: '🏦 В банке: {t} из {max}', ad_bank_full: 'Банк полон', ad_bank_room: 'Банк полон — место для просмотра через {t}',
+    ad_bank_full_toast: 'Банк буста заполнен (максимум {max})', ad_once: '🎯 Разовая награда',
+    ad_boost_count: '📺 Просмотров в банк: {n}', ad_total: '📺 Всего просмотров: {n}',
+    boost_left: 'x{m} ещё {t}', boost_bank: 'x{m} · {t} / {max}',
     menu_hide: 'Свернуть меню', menu_show: 'Открыть меню',
     off_title: 'Пока вас не было', off_text: 'Монстры трудились {t} и накопили:', off_claim: 'Забрать', off_claim2: '▶ Забрать x{m}',
     off_cap: 'Лимит оффлайна: {h} ч · эффективность {p}%',
@@ -543,13 +545,15 @@ const I18N = {
     reset: 'Reset progress', reset_q: 'Delete all progress? This cannot be undone!', reset_q2: 'Really, really sure? The monsters will be sad 😢',
     reset_done: 'Progress reset', yes: 'Yes', no: 'No', cancel: 'Cancel', ok: 'OK', close: 'Close', open_settings: 'Settings',
     ads_title: 'Bonuses', ads_intro: 'Watch an ad if you like — the monsters will thank you!',
-    ad_boost: 'Income x{m}: +{t} per view', ad_boost_desc: 'Each view adds {t} to the total boost', ad_instant: 'Instant reward',
+    ad_boost: 'Boost bank x{m}', ad_boost_desc: '+{t} for every view · up to {max}', ad_instant: 'Instant reward',
     ad_instant_desc: '{m} min of income: {v}', ad_summon: 'Summon a golden slime', ad_summon_desc: 'Appears now: x{f} for {s} s or {i} min of income',
     ad_watch: '▶ Watch', ad_unavailable: 'Ads are unavailable right now. Please try again later 🙏',
     ad_no_reward: 'The reward is given only for a full view', ad_thanks: 'Thanks! Reward received 🎉',
-    ad_income: 'Your income: {v}/sec · current multiplier x{m}', ad_active: '⚡ Stacked: x{m} for {t}',
-    ad_boost_count: '📺 Boost views: {n}', ad_total: '📺 Total ads watched: {n}',
-    boost_left: 'x{m} for {t}',
+    ad_income: 'Your income: {v}/sec · current multiplier x{m}',
+    ad_bank: '🏦 In the bank: {t} of {max}', ad_bank_full: 'Bank full', ad_bank_room: 'Bank full — room for a view in {t}',
+    ad_bank_full_toast: 'The boost bank is full (max {max})', ad_once: '🎯 One-time reward',
+    ad_boost_count: '📺 Views into the bank: {n}', ad_total: '📺 Total views: {n}',
+    boost_left: 'x{m} for {t}', boost_bank: 'x{m} · {t} / {max}',
     menu_hide: 'Hide menu', menu_show: 'Open menu',
     off_title: 'While you were away', off_text: 'Your monsters worked for {t} and collected:', off_claim: 'Claim', off_claim2: '▶ Claim x{m}',
     off_cap: 'Offline limit: {h} h · efficiency {p}%',
@@ -722,9 +726,8 @@ function sanitizeState(s) {
   });
   s.golden.next = U.clamp(s.golden.next, 1, CONFIG.golden.maxSec * 2);
   s.boosts.frenzyLeft = U.clamp(s.boosts.frenzyLeft, 0, 600);
-  // защита от мусора в сохранении (буст копится без лимита)
-  const adCap = Date.now() + CONFIG.ads.safetyCapDays * 86400e3;
-  s.boosts.adUntil = Math.min(s.boosts.adUntil, adCap);
+  // банк буста не больше ёмкости (старые сохранения могли накопить больше)
+  s.boosts.adUntil = Math.min(s.boosts.adUntil, Date.now() + CONFIG.ads.boost.bankHours * 3600e3);
   s.settings.lang = ''; // язык всегда берётся из SDK при запуске
   s.v = CONFIG.saveVersion;
   return s;
@@ -1397,7 +1400,7 @@ const Meta = {
     S.login.streak = day;
     Economy.earn(r);
     if (day === 7) {
-      S.boosts.adUntil = Math.max(Date.now(), S.boosts.adUntil) + CONFIG.login.day7BoostHours * 3600e3;
+      Ads.addToBank(CONFIG.login.day7BoostHours * 60);
       Economy.invalidate();
     }
     return { r, day };
@@ -1862,7 +1865,7 @@ const UI = {
   boosts() {
     const now = Date.now(), b = S.boosts, chips = [];
     if (b.frenzyLeft > 0) chips.push(`<span class="chip fr">🔥 x${b.frenzyMult} ${Math.ceil(b.frenzyLeft)}${t('t_s')}</span>`);
-    if (b.adUntil > now) chips.push(`<span class="chip ad">⚡ ${t('boost_left', { m: CONFIG.ads.boost.mult, t: Fmt.time((b.adUntil - now) / 1000) })}</span>`);
+    if (b.adUntil > now) chips.push(`<span class="chip ad">⚡ ${t('boost_bank', { m: CONFIG.ads.boost.mult, t: Fmt.time(Ads.bankLeft()), max: Fmt.time(Ads.bankMax()) })}</span>`);
     if (b.weeklyUntil > now) chips.push(`<span class="chip wk">🏅 ${t('boost_left', { m: CONFIG.weekly.boostMult, t: Fmt.time((b.weeklyUntil - now) / 1000) })}</span>`);
     const html = chips.join('');
     if ($('boosts').innerHTML !== html) $('boosts').innerHTML = html;
@@ -2238,26 +2241,34 @@ const UI = {
   settingsModal() { this.openModal({ kind: 'settings', title: '⚙️ ' + t('settings_title'), html: this.settingsHtml() }); },
   adsModal() {
     const A = CONFIG.ads, G = CONFIG.golden;
-    const row = (kind, icon, title, desc) => `<div class="card adrow"><div class="ico sm" style="--c:#ffd166">${icon}</div>
+    const row = (kind, icon, title, desc, extra = '') => `<div class="card adrow"><div class="ico sm" style="--c:#ffd166">${icon}</div>
       <div class="info"><div class="name">${title}</div><div class="desc" data-k="${kind}d">${desc}</div>
       <div class="desc small adinfo" data-k="${kind}i"></div></div>
-      <button class="buy ad" data-act="ad" data-kind="${kind}" data-k="${kind}btn"><span class="n">${t('ad_watch')}</span></button></div>`;
+      <button class="buy ad" data-act="ad" data-kind="${kind}" data-k="${kind}btn"><span class="n" data-k="${kind}lbl">${t('ad_watch')}</span></button>${extra}</div>`;
+    // шкала банка: деления по одному просмотру
+    const steps = Math.round(A.boost.bankHours * 60 / A.boost.minutes);
+    const bank = `<div class="bank"><div class="bank-bar"><i data-k="bankfill"></i>${'<b></b>'.repeat(steps)}</div><div class="bank-txt" data-k="banktxt"></div></div>`;
     this.openModal({
       kind: 'ads', title: '🎁 ' + t('ads_title'),
       html: `<p class="mtext">${t('ads_intro')}</p><p class="desc center adincome" data-k="adinc"></p>` +
-        row('boost', '⚡', t('ad_boost', { m: A.boost.mult, t: Fmt.time(A.boost.minutes * 60) }), '') +
+        row('boost', '⚡', t('ad_boost', { m: A.boost.mult, t: Fmt.time(A.boost.minutes * 60) }), '', bank) +
         row('instant', '💰', t('ad_instant'), '') +
         row('summon', '🥚', t('ad_summon'), t('ad_summon_desc', { f: G.frenzyMult + Prestige.E.goldenPow, s: Math.round(G.frenzySec * Prestige.E.goldenDur), i: Math.round(G.instantSec / 60) })),
       vals() {
         const v = {}, c = Economy.get();
         v.adinc = t('ad_income', { v: Fmt.num(c.pps, 1), m: Fmt.mult(c.temp) });
-        ['boost', 'instant', 'summon'].forEach(k => { v[k + 'btn'] = { off: Ads.busy }; });
-        const bl = Math.max(0, (S.boosts.adUntil - Date.now()) / 1000);
-        v.boostd = bl > 0 ? t('ad_active', { m: A.boost.mult, t: Fmt.time(bl) }) : t('ad_boost_desc', { t: Fmt.time(A.boost.minutes * 60) });
+        ['instant', 'summon'].forEach(k => { v[k + 'btn'] = { off: Ads.busy }; });
+        const left = Ads.bankLeft(), max = Ads.bankMax(), full = Ads.bankFull();
+        v.bankfill = { w: left / max };
+        v.banktxt = t('ad_bank', { t: Fmt.time(left), max: Fmt.time(max) });
+        v.boostbtn = { off: Ads.busy || full };
+        v.boostlbl = full ? t('ad_bank_full') : t('ad_watch');
+        v.boostd = full ? t('ad_bank_room', { t: Fmt.time(left - (max - A.boost.minutes * 60)) })
+          : t('ad_boost_desc', { t: Fmt.time(A.boost.minutes * 60), max: Fmt.time(max) });
         v.boosti = t('ad_boost_count', { n: S.stats.adBoosts });
         v.instantd = t('ad_instant_desc', { m: A.instant.minutes, v: cur(Economy.incomeFor(A.instant.minutes, A.instant.minMoney)) });
-        v.instanti = t('ad_total', { n: S.stats.ads });
-        v.summoni = '';
+        v.instanti = t('ad_once');
+        v.summoni = t('ad_once') + ' · ' + t('ad_total', { n: S.stats.ads });
         return v;
       },
     });
@@ -2382,6 +2393,15 @@ const UI = {
 // ===================== ADS: реклама только по желанию =====================
 const Ads = {
   busy: false, lastInter: Date.now(),
+  // --- общий банк буста ---
+  bankMax() { return CONFIG.ads.boost.bankHours * 3600; },
+  bankLeft() { return U.clamp((S.boosts.adUntil - Date.now()) / 1000, 0, this.bankMax()); },
+  // один просмотр должен целиком помещаться в банк
+  bankFull() { return this.bankLeft() > this.bankMax() - CONFIG.ads.boost.minutes * 60 + 1; },
+  addToBank(minutes) {
+    const now = Date.now();
+    S.boosts.adUntil = Math.min(now + this.bankMax() * 1000, Math.max(now, S.boosts.adUntil) + minutes * 60e3);
+  },
   // награда выдаётся строго в onRewarded; перезарядки нет
   rewarded(kind, onReward) {
     if (this.busy) return;
@@ -2409,10 +2429,9 @@ const Ads = {
   },
   byKind(kind, el) {
     if (kind === 'boost') {
+      if (this.bankFull()) { UI.toast('🏦 ' + t('ad_bank_full_toast', { max: Fmt.time(this.bankMax()) })); return; }
       this.rewarded('boost', () => {
-        // время копится с каждым просмотром, без верхнего лимита
-        const now = Date.now(), cfg = CONFIG.ads.boost;
-        S.boosts.adUntil = Math.min(now + CONFIG.ads.safetyCapDays * 86400e3, Math.max(now, S.boosts.adUntil) + cfg.minutes * 60e3);
+        this.addToBank(CONFIG.ads.boost.minutes);
         S.stats.adBoosts++;
         Economy.invalidate();
       });

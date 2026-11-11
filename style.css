@@ -56,7 +56,7 @@ button {
   position: relative; animation: wobble 3s ease-in-out infinite;
 }
 #cur-ico i { position: absolute; left: 11px; top: 15px; width: 6px; height: 7px; border-radius: 50%; background: #1b1030; box-shadow: 14px 0 0 #1b1030; }
-.cur-txt { min-width: 0; }
+.cur-txt { min-width: 0; overflow: hidden; }
 #money { font-size: 28px; font-weight: 900; letter-spacing: .3px; line-height: 1.05; white-space: nowrap; text-shadow: 0 2px 0 rgba(0, 0, 0, .3); }
 #pps { font-size: 15px; color: var(--slime); font-weight: 700; white-space: nowrap; }
 #boosts { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
@@ -253,6 +253,14 @@ button {
 .adrow .ico.sm { width: 46px; height: 46px; font-size: 24px; }
 .adincome { margin: -4px 0 10px; font-weight: 700; color: var(--slime); }
 .adinfo { color: var(--gold); margin-top: 4px; }
+/* банк буста: шкала с делениями по одному просмотру */
+.adrow { flex-wrap: wrap; }
+.bank { flex-basis: 100%; margin-top: 2px; }
+.bank-bar { position: relative; display: flex; height: 18px; border-radius: 99px; overflow: hidden; background: rgba(0, 0, 0, .35); border: 1px solid rgba(255, 209, 102, .35); }
+.bank-bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, #ffe08f, #f5b83d); transition: width .4s ease-out; }
+.bank-bar b { position: relative; flex: 1; border-right: 2px solid rgba(30, 16, 64, .55); }
+.bank-bar b:last-child { border-right: 0; }
+.bank-txt { font-size: 14px; font-weight: 800; color: var(--gold); margin-top: 3px; }
 
 /* дерево престижа */
 .tree-top { text-align: center; font-weight: 900; color: var(--gold); margin-bottom: 6px; font-size: 17px; }
@@ -360,6 +368,12 @@ button {
 }
 @media (max-height: 640px) and (max-aspect-ratio: 1/1) {
   #scene { height: 32%; min-height: 180px; }
+}
+/* узкий экран: бусты переносятся отдельной строкой под счётчиком, не перекрывая его */
+@media (max-width: 480px) {
+  #top { flex-wrap: wrap; row-gap: 4px; }
+  #boosts { order: 9; flex-basis: 100%; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 4px; }
+  #boosts:empty { display: none; }
 }
 @media (max-width: 360px) {
   .buy { min-width: 92px; }

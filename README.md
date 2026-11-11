@@ -72,7 +72,10 @@ Late buildings look useless at base payback. They become worth buying once the g
 * `GameplayAPI.start()/stop()` follow the real state: stopped for modals/menus, ads, hidden tab or lost focus, and SDK `game_api_pause`.
 * **Language (requirement 2.14):** detected from `ysdk.environment.i18n.lang` on **every launch** (ru/be/kk/uk/uz → ru, all other codes → en). The manual RU/EN switch in Settings lasts only for the current session and is never saved, so a stored choice can't override the SDK. The loading screen shows no text until the language is known. Locally, `?lang=ru` / `?lang=en` simulates the platform language.
 * Saves go to `player.setData/getData` (throttled to once per 30 s, forced on prestige/hide) with a localStorage backup. The newer save wins. Each save is versioned (`saveVersion`) and passed through migrations, then deep-merged with defaults and sanitized (NaN, Infinity, negatives, unknown ids).
-* Rewarded ads use `showRewardedVideo`, and the reward is applied **only in `onRewarded`**. Errors show a polite toast. Ad rewards have **no cooldown** (`CONFIG.ads`): every boost view adds +30 min of x1.5 income to one shared timer with no upper limit (a 30-day cap exists only to reject corrupted saves). There's also 10 min of income instantly, summon a golden slime, bring back a missed slime, offline reward x1.5 and one extra daily task. The Bonuses window shows current income, the stacked boost time, the number of boost views and total ads watched (also in Statistics).
+* Rewarded ads use `showRewardedVideo`, and the reward is applied **only in `onRewarded`**. Errors show a polite toast. There is **no cooldown** on any ad (`CONFIG.ads`).
+  * **Boost bank** (repeatable): one shared bank holding up to **4 h** of x1.5 income. Each view adds **+30 min** (8 views fill it), and the time drains while you play. When there isn't room for a full 30 min, the button shows "Bank full" (no ad is shown, so a view is never wasted) and says when there will be room again. The day-7 login bonus also goes into the bank. The bank is shown as an 8-segment bar in the Bonuses window and as `x1.5 · 1h 34m / 4h` in the header.
+  * **One-time rewards** (don't go into the bank): 10 min of income instantly, summon a golden slime, bring back a missed slime, offline reward x1.5, one extra daily task.
+  * Counters: views into the bank and total ads watched (also in Statistics).
 * Fullscreen ads use `showFullscreenAdv` at most once per 3.5 min, never in the first 3 min, and only after prestige or closing the offline window.
 * Sound and the game loop pause during ads, on `visibilitychange`/`blur`, and resume afterwards. Missed time is credited through the offline logic.
 * Context menu, text selection, drag, double-tap and pinch zoom are disabled.
@@ -87,7 +90,7 @@ python3 -m http.server 8080   # then open http://localhost:8080
 
 ## Checklist before submitting to Yandex moderation
 
-- [ ] Upload a zip containing `index.html`, `style.css` and `game.js` at the archive root (not inside a folder).
+- [ ] Upload a zip containing `index.html`, `style.css` and `game.js` at the archive root (not inside a folder). Do **not** include `promo/` or `README.md`.
 - [ ] The game starts in the Yandex draft preview, the loading screen disappears and the first frame is interactive. `LoadingAPI.ready` shows in the console/draft checks.
 - [ ] Rewarded ads: each of the 6 buttons pays out only after a full view. Closing early gives no reward. Sound is muted during the ad.
 - [ ] Fullscreen ads are not shown more than once per ~3.5 min and never right after a tap/purchase.
@@ -103,8 +106,13 @@ python3 -m http.server 8080   # then open http://localhost:8080
 ## What to replace or configure
 
 * **Name:** "Монстроферма" / "Monster Ranch" (change `title` in `I18N` and `<title>` if you rename the game).
-* **Icon (512×512)** and **cover (800×470)**: export the canvas monster (screenshot) or draw them in your own style. The platform requires them in the console.
-* **Description and promo texts** (RU/EN) for the catalog page, plus 3–5 screenshots (portrait and landscape).
+* **Store images are ready in `promo/`** (rendered from the game itself, sizes per the Yandex draft requirements):
+  * `icon_512.png`: icon 512×512 PNG; the monster sits in the central safe zone, so it also works as the maskable icon.
+  * `cover_800x470_ru.png`, `cover_800x470_en.png`: cover 800×470 PNG for each language.
+  * `screen_mobile_*_ru|en.png`: portrait 9:16, 1080×1920, 24-bit PNG (select portrait orientation for mobile).
+  * `screen_desktop_*_ru|en.png`: landscape 16:9, 1920×1080, 24-bit PNG.
+  * Yandex needs at least 2 screenshots per selected platform: each language has 2 mobile + 2 desktop.
+* **Description and promo texts** (RU/EN) for the catalog page. Yandex also marks a horizontal gameplay video (MP4, up to 28 s) as required in the draft.
 * **Age rating:** 0+ (no violence; cartoon monsters).
 * **Save key:** `CONFIG.saveKey`. Bump `CONFIG.saveVersion` and add a `MIGRATIONS[n]` entry when the save format changes.
 * **Balance:** everything is in `CONFIG` (buildings, upgrades, trees, golden slime, offline, ads cooldowns/intervals).
