@@ -27,7 +27,8 @@ Currencies: **Слизь / Goo 🟢** (main), **Мутаген / Mutagen 🧪** 
 * **52 achievements** (+1% income each, never reset), toast notifications.
 * **Daily:** 3 tasks per day (+1 ad slot), weekly challenge (x2 income for 2 h + reward), 7-day login streak.
 * **Golden slime:** every 1–3 min. Gives either x3 income for 30 s or an instant reward of 5 min of income. A missed slime can be brought back with an ad.
-* **Offline income:** 2 h cap at 50% efficiency (the trees raise both). "While you were away" window with **Claim x2 (ad)**.
+* **Offline income:** 2 h cap at 50% efficiency (the trees raise both). "While you were away" window with **Claim x1.5 (ad)**.
+* **Mobile menu:** the bottom panel collapses with the "Hide menu / Open menu" button so the monster fills the screen. The state is saved. On desktop the panel is always open.
 * **Other:** combo multiplier for fast taps (up to x2, extendable), BigNum (`BN` class, mantissa/exponent), K/M/B/T/Qa… suffixes then scientific notation, statistics, settings (sound, music, RU/EN, reset with double confirm), Web Audio SFX + generative music, 60 s tutorial then non-intrusive tips.
 
 ## Balance
@@ -71,7 +72,7 @@ Late buildings look useless at base payback. They become worth buying once the g
 * `GameplayAPI.start()/stop()` follow the real state: stopped for modals/menus, ads, hidden tab or lost focus, and SDK `game_api_pause`.
 * Language comes from `ysdk.environment.i18n.lang` (ru/be/kk/uk/uz → ru, everything else → en) and can be overridden in Settings.
 * Saves go to `player.setData/getData` (throttled to once per 30 s, forced on prestige/hide) with a localStorage backup. The newer save wins. Each save is versioned (`saveVersion`) and passed through migrations, then deep-merged with defaults and sanitized (NaN, Infinity, negatives, unknown ids).
-* Rewarded ads use `showRewardedVideo`, and the reward is applied **only in `onRewarded`**. Per-reward cooldowns are shown as bars. Errors show a polite toast.
+* Rewarded ads use `showRewardedVideo`, and the reward is applied **only in `onRewarded`**. Errors show a polite toast. Ad rewards are deliberately modest (`CONFIG.ads`): x1.5 income for 30 min (stacks up to 2 h, 15 min cooldown), 10 min of income instantly (10 min cooldown), summon a golden slime (15 min cooldown), bring back a missed slime (10 min cooldown), offline reward x1.5, one extra daily task. The Bonuses window shows current income, the exact reward, its cooldown and the time left.
 * Fullscreen ads use `showFullscreenAdv` at most once per 3.5 min, never in the first 3 min, and only after prestige or closing the offline window.
 * Sound and the game loop pause during ads, on `visibilitychange`/`blur`, and resume afterwards. Missed time is credited through the offline logic.
 * Context menu, text selection, drag, double-tap and pinch zoom are disabled.

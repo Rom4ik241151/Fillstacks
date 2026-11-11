@@ -164,7 +164,7 @@ const CONFIG = {
     ],
   },
   weekly: {
-    boostHours: 2, rewardMinutes: 60, rewardMinMoney: 1e4,
+    boostHours: 2, boostMult: 2, rewardMinutes: 60, rewardMinMoney: 1e4,
     templates: [
       { type: 'golden', v: 25 }, { type: 'buy', v: 1500 }, { type: 'tap', v: 6000 },
       { type: 'rebirth', v: 2 }, { type: 'upgrade', v: 60 },
@@ -179,10 +179,12 @@ const CONFIG = {
   ads: {
     interMinSec: 210,       // полноэкранная не чаще раза в 3.5 мин
     interFirstSec: 180,     // и не раньше 3 мин после старта
-    boost: { hours: 4, maxHours: 24, cd: 300 },
-    instant: { minutes: 30, minMoney: 1000, cd: 240 },
-    summon: { cd: 300 },
-    restore: { cd: 180 },
+    // награды за рекламу намеренно скромные, чтобы не ломать темп игры
+    boost: { mult: 1.5, minutes: 30, maxMinutes: 120, cd: 900 },
+    instant: { minutes: 10, minMoney: 500, cd: 600 },
+    summon: { cd: 900 },
+    restore: { cd: 600 },
+    offlineMult: 1.5,
   },
 
   tutorialSec: 60,
@@ -408,12 +410,15 @@ const I18N = {
     reset: 'Сбросить прогресс', reset_q: 'Точно удалить весь прогресс? Это нельзя отменить!', reset_q2: 'Совсем-совсем точно? Монстры будут грустить 😢',
     reset_done: 'Прогресс сброшен', yes: 'Да', no: 'Нет', cancel: 'Отмена', ok: 'Ок', close: 'Закрыть', open_settings: 'Настройки',
     ads_title: 'Бонусы', ads_intro: 'Посмотрите рекламу по желанию — монстры скажут спасибо!',
-    ad_boost: 'x2 доход на {h} ч', ad_boost_desc: 'Время суммируется (до {m} ч)', ad_instant: 'Мгновенная награда',
-    ad_instant_desc: 'Доход за {m} минут: {v}', ad_summon: 'Позвать золотого слизня', ad_summon_desc: 'Появится прямо сейчас',
+    ad_boost: 'Доход x{m} на {t}', ad_boost_desc: 'Время суммируется, максимум {t}', ad_instant: 'Мгновенная награда',
+    ad_instant_desc: 'Доход за {m} мин: {v}', ad_summon: 'Позвать золотого слизня', ad_summon_desc: 'Появится сразу: x{f} на {s} с или доход за {i} мин',
     ad_watch: '▶ Смотреть', ad_cd: 'через {t}', ad_unavailable: 'Реклама сейчас недоступна. Попробуйте чуть позже 🙏',
     ad_no_reward: 'Награда выдаётся только за полный просмотр', ad_thanks: 'Спасибо! Награда получена 🎉',
-    boost_left: 'x2 ещё {t}',
-    off_title: 'Пока вас не было', off_text: 'Монстры трудились {t} и накопили:', off_claim: 'Забрать', off_claim2: '▶ Забрать x2',
+    ad_income: 'Ваш доход: {v}/сек · множитель сейчас x{m}', ad_cd_info: '⏱ Перезарядка: {t}',
+    ad_ready_in: '⏳ Доступно через {t}', ad_active: '⚡ Активно: x{m} ещё {t}',
+    boost_left: 'x{m} ещё {t}',
+    menu_hide: 'Свернуть меню', menu_show: 'Открыть меню',
+    off_title: 'Пока вас не было', off_text: 'Монстры трудились {t} и накопили:', off_claim: 'Забрать', off_claim2: '▶ Забрать x{m}',
     off_cap: 'Лимит оффлайна: {h} ч · эффективность {p}%',
     gold_frenzy: 'Безумие! Доход x{m} на {s} сек', gold_instant: 'Золотая слизь! +{v}', gold_missed: 'Золотой слизень убежал!',
     gold_restore: '▶ Вернуть', frenzy: 'x{m} {t}',
@@ -539,12 +544,15 @@ const I18N = {
     reset: 'Reset progress', reset_q: 'Delete all progress? This cannot be undone!', reset_q2: 'Really, really sure? The monsters will be sad 😢',
     reset_done: 'Progress reset', yes: 'Yes', no: 'No', cancel: 'Cancel', ok: 'OK', close: 'Close', open_settings: 'Settings',
     ads_title: 'Bonuses', ads_intro: 'Watch an ad if you like — the monsters will thank you!',
-    ad_boost: 'x2 income for {h} h', ad_boost_desc: 'Time stacks (up to {m} h)', ad_instant: 'Instant reward',
-    ad_instant_desc: '{m} minutes of income: {v}', ad_summon: 'Summon a golden slime', ad_summon_desc: 'It appears right now',
+    ad_boost: 'Income x{m} for {t}', ad_boost_desc: 'Time stacks, up to {t}', ad_instant: 'Instant reward',
+    ad_instant_desc: '{m} min of income: {v}', ad_summon: 'Summon a golden slime', ad_summon_desc: 'Appears now: x{f} for {s} s or {i} min of income',
     ad_watch: '▶ Watch', ad_cd: 'in {t}', ad_unavailable: 'Ads are unavailable right now. Please try again later 🙏',
     ad_no_reward: 'The reward is given only for a full view', ad_thanks: 'Thanks! Reward received 🎉',
-    boost_left: 'x2 for {t}',
-    off_title: 'While you were away', off_text: 'Your monsters worked for {t} and collected:', off_claim: 'Claim', off_claim2: '▶ Claim x2',
+    ad_income: 'Your income: {v}/sec · current multiplier x{m}', ad_cd_info: '⏱ Cooldown: {t}',
+    ad_ready_in: '⏳ Available again in {t}', ad_active: '⚡ Active: x{m} for {t}',
+    boost_left: 'x{m} for {t}',
+    menu_hide: 'Hide menu', menu_show: 'Open menu',
+    off_title: 'While you were away', off_text: 'Your monsters worked for {t} and collected:', off_claim: 'Claim', off_claim2: '▶ Claim x{m}',
     off_cap: 'Offline limit: {h} h · efficiency {p}%',
     gold_frenzy: 'Frenzy! Income x{m} for {s} sec', gold_instant: 'Golden goo! +{v}', gold_missed: 'The golden slime ran away!',
     gold_restore: '▶ Bring back', frenzy: 'x{m} {t}',
@@ -608,9 +616,9 @@ const Fmt = {
   time(sec) {
     sec = Math.max(0, Math.floor(U.safeNum(sec)));
     const d = Math.floor(sec / 86400), h = Math.floor((sec % 86400) / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
-    if (d > 0) return `${d}${t('t_d')} ${h}${t('t_h')}`;
-    if (h > 0) return `${h}${t('t_h')} ${m}${t('t_m')}`;
-    if (m > 0) return `${m}${t('t_m')} ${s}${t('t_s')}`;
+    if (d > 0) return h ? `${d}${t('t_d')} ${h}${t('t_h')}` : `${d}${t('t_d')}`;
+    if (h > 0) return m ? `${h}${t('t_h')} ${m}${t('t_m')}` : `${h}${t('t_h')}`;
+    if (m > 0) return s ? `${m}${t('t_m')} ${s}${t('t_s')}` : `${m}${t('t_m')}`;
     return `${s}${t('t_s')}`;
   },
   pct(v) { return (+(v * 100).toFixed(1)).toString(); },
@@ -642,7 +650,7 @@ function newState() {
     daily: { day: -1, tasks: [], extra: false },
     weekly: { week: -1, type: '', target: 0, progress: 0, claimed: false },
     login: { last: -1, streak: 0 },
-    settings: { sound: true, music: true, lang: '' },
+    settings: { sound: true, music: true, lang: '', menuOpen: true },
     tutorial: { done: false, time: 0 },
     golden: { next: CONFIG.golden.firstSec },
   };
@@ -717,6 +725,9 @@ function sanitizeState(s) {
   });
   s.golden.next = U.clamp(s.golden.next, 1, CONFIG.golden.maxSec * 2);
   s.boosts.frenzyLeft = U.clamp(s.boosts.frenzyLeft, 0, 600);
+  // старые сохранения могли накопить буст до 24 ч — обрезаем под новые лимиты
+  const adCap = Date.now() + CONFIG.ads.boost.maxMinutes * 60e3 + CONFIG.login.day7BoostHours * 3600e3;
+  s.boosts.adUntil = Math.min(s.boosts.adUntil, adCap);
   s.v = CONFIG.saveVersion;
   return s;
 }
@@ -1058,8 +1069,8 @@ const Economy = {
   tempMult(now) {
     const b = S.boosts;
     let m = 1;
-    if (b.adUntil > now) m *= 2;
-    if (b.weeklyUntil > now) m *= 2;
+    if (b.adUntil > now) m *= CONFIG.ads.boost.mult;
+    if (b.weeklyUntil > now) m *= CONFIG.weekly.boostMult;
     if (b.frenzyLeft > 0) m *= b.frenzyMult;
     return m;
   },
@@ -1761,6 +1772,8 @@ const UI = {
     $('toasts').addEventListener('click', onAct);
     $('btn-ads').addEventListener('click', () => this.adsModal());
     $('btn-set').addEventListener('click', () => this.settingsModal());
+    $('menu-toggle').addEventListener('click', () => this.setMenu(!S.settings.menuOpen));
+    this.applyMenu();
     this.shownMoney = S.money;
     this.render();
   },
@@ -1769,6 +1782,21 @@ const UI = {
     document.title = t('title');
     $('tabs').innerHTML = TABS.map(tb =>
       `<button class="tab${tb.id === this.tab ? ' on' : ''}" data-tab="${tb.id}"><span class="ti">${tb.icon}</span><span class="tl">${t('tab_' + tb.id)}</span><i class="dot"></i></button>`).join('');
+    if ($('menu-toggle-txt')) this.applyMenu();
+  },
+  // сворачивание нижнего меню на мобильных
+  setMenu(open) {
+    S.settings.menuOpen = !!open;
+    this.applyMenu();
+    Save.save();
+  },
+  applyMenu() {
+    const open = S.settings.menuOpen;
+    $('app').classList.toggle('menu-closed', !open);
+    $('menu-toggle').setAttribute('aria-expanded', String(open));
+    $('menu-toggle-txt').textContent = open ? t('menu_hide') : t('menu_show');
+    // сцена меняет размер — пересчитываем canvas сразу и после раскладки
+    if (Scene.cv) { Scene.resize(); requestAnimationFrame(() => Scene.resize()); }
   },
   setTab(id) {
     this.tab = id;
@@ -1831,8 +1859,8 @@ const UI = {
   boosts() {
     const now = Date.now(), b = S.boosts, chips = [];
     if (b.frenzyLeft > 0) chips.push(`<span class="chip fr">🔥 x${b.frenzyMult} ${Math.ceil(b.frenzyLeft)}${t('t_s')}</span>`);
-    if (b.adUntil > now) chips.push(`<span class="chip ad">⚡ ${t('boost_left', { t: Fmt.time((b.adUntil - now) / 1000) })}</span>`);
-    if (b.weeklyUntil > now) chips.push(`<span class="chip wk">🏅 ${t('boost_left', { t: Fmt.time((b.weeklyUntil - now) / 1000) })}</span>`);
+    if (b.adUntil > now) chips.push(`<span class="chip ad">⚡ ${t('boost_left', { m: CONFIG.ads.boost.mult, t: Fmt.time((b.adUntil - now) / 1000) })}</span>`);
+    if (b.weeklyUntil > now) chips.push(`<span class="chip wk">🏅 ${t('boost_left', { m: CONFIG.weekly.boostMult, t: Fmt.time((b.weeklyUntil - now) / 1000) })}</span>`);
     const html = chips.join('');
     if ($('boosts').innerHTML !== html) $('boosts').innerHTML = html;
   },
@@ -1847,6 +1875,7 @@ const UI = {
       tasks: Meta.loginAvailable() || S.daily.tasks.some(tk => !tk.claimed && Meta.taskDone(tk)) || (!S.weekly.claimed && S.weekly.progress >= S.weekly.target),
     };
     document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('badge', !!has[b.dataset.tab]));
+    $('menu-toggle').classList.toggle('badge', !S.settings.menuOpen && Object.values(has).some(Boolean));
     const adReady = ['boost', 'instant', 'summon'].some(k => Ads.cdLeft(k) <= 0);
     $('btn-ads').classList.toggle('badge', adReady);
   },
@@ -2205,26 +2234,30 @@ const UI = {
   },
   settingsModal() { this.openModal({ kind: 'settings', title: '⚙️ ' + t('settings_title'), html: this.settingsHtml() }); },
   adsModal() {
+    const A = CONFIG.ads, G = CONFIG.golden;
     const row = (kind, icon, title, desc) => `<div class="card adrow"><div class="ico sm" style="--c:#ffd166">${icon}</div>
-      <div class="info"><div class="name">${title}</div><div class="desc" data-k="${kind}d">${desc}</div><div class="bar cd"><i data-k="${kind}bar"></i></div></div>
+      <div class="info"><div class="name">${title}</div><div class="desc" data-k="${kind}d">${desc}</div>
+      <div class="desc small adinfo" data-k="${kind}i"></div><div class="bar cd"><i data-k="${kind}bar"></i></div></div>
       <button class="buy ad" data-act="ad" data-kind="${kind}" data-k="${kind}btn"><span class="n" data-k="${kind}lbl"></span></button></div>`;
     this.openModal({
       kind: 'ads', title: '🎁 ' + t('ads_title'),
-      html: `<p class="mtext">${t('ads_intro')}</p>` +
-        row('boost', '⚡', t('ad_boost', { h: CONFIG.ads.boost.hours }), t('ad_boost_desc', { m: CONFIG.ads.boost.maxHours })) +
+      html: `<p class="mtext">${t('ads_intro')}</p><p class="desc center adincome" data-k="adinc"></p>` +
+        row('boost', '⚡', t('ad_boost', { m: A.boost.mult, t: Fmt.time(A.boost.minutes * 60) }), '') +
         row('instant', '💰', t('ad_instant'), '') +
-        row('summon', '🥚', t('ad_summon'), t('ad_summon_desc')),
+        row('summon', '🥚', t('ad_summon'), t('ad_summon_desc', { f: G.frenzyMult + Prestige.E.goldenPow, s: Math.round(G.frenzySec * Prestige.E.goldenDur), i: Math.round(G.instantSec / 60) })),
       vals() {
-        const v = {};
+        const v = {}, c = Economy.get();
+        v.adinc = t('ad_income', { v: Fmt.num(c.pps, 1), m: Fmt.mult(c.temp) });
         ['boost', 'instant', 'summon'].forEach(k => {
-          const left = Ads.cdLeft(k), cd = CONFIG.ads[k].cd;
+          const left = Ads.cdLeft(k), cd = A[k].cd;
           v[k + 'lbl'] = left > 0 ? t('ad_cd', { t: Fmt.time(left) }) : t('ad_watch');
           v[k + 'btn'] = { off: left > 0 || Ads.busy };
           v[k + 'bar'] = { w: 1 - left / cd };
+          v[k + 'i'] = left > 0 ? t('ad_ready_in', { t: Fmt.time(left) }) : t('ad_cd_info', { t: Fmt.time(cd) });
         });
-        v.instantd = t('ad_instant_desc', { m: CONFIG.ads.instant.minutes, v: cur(Economy.incomeFor(CONFIG.ads.instant.minutes, CONFIG.ads.instant.minMoney)) });
+        v.instantd = t('ad_instant_desc', { m: A.instant.minutes, v: cur(Economy.incomeFor(A.instant.minutes, A.instant.minMoney)) });
         const bl = (S.boosts.adUntil - Date.now()) / 1000;
-        v.boostd = bl > 0 ? t('boost_left', { t: Fmt.time(bl) }) : t('ad_boost_desc', { m: CONFIG.ads.boost.maxHours });
+        v.boostd = bl > 0 ? t('ad_active', { m: A.boost.mult, t: Fmt.time(bl) }) : t('ad_boost_desc', { t: Fmt.time(A.boost.maxMinutes * 60) });
         return v;
       },
     });
@@ -2246,7 +2279,7 @@ const UI = {
         <p class="desc center small">${t('off_cap', { h: Fmt.num(Economy.offlineCapSec() / 3600), p: Math.round(Economy.offlineEff() * 100) })}</p>`,
       buttons: [
         { label: t('off_claim'), cls: 'ghost', fn: () => claim(1) },
-        { label: t('off_claim2'), cls: 'hot ad', keep: true, fn: () => Ads.rewarded('offline', () => { claim(2); UI.closeModalIf('offline'); }) },
+        { label: t('off_claim2', { m: CONFIG.ads.offlineMult }), cls: 'hot ad', keep: true, fn: () => Ads.rewarded('offline', () => { claim(CONFIG.ads.offlineMult); UI.closeModalIf('offline'); }) },
       ],
       onClose: () => claim(1),
       after: () => { claim(1); Ads.interstitial(); },
@@ -2376,7 +2409,7 @@ const Ads = {
     if (kind === 'boost') {
       this.rewarded('boost', () => {
         const now = Date.now(), cfg = CONFIG.ads.boost;
-        S.boosts.adUntil = Math.min(now + cfg.maxHours * 3600e3, Math.max(now, S.boosts.adUntil) + cfg.hours * 3600e3);
+        S.boosts.adUntil = Math.min(now + cfg.maxMinutes * 60e3, Math.max(now, S.boosts.adUntil) + cfg.minutes * 60e3);
         Economy.invalidate();
       });
     } else if (kind === 'instant') {
@@ -2471,6 +2504,7 @@ const Tutorial = {
       const key = S.stats.taps < 5 ? 'tut_tap' : S.gens[0] < 1 ? 'tut_buy' : 'tut_more';
       UI.hint(t(key), 'tut');
       if (key === 'tut_buy' && UI.tab !== 'farm') UI.setTab('farm');
+      if (key === 'tut_buy' && !S.settings.menuOpen) UI.setMenu(true);
       const basics = S.stats.taps >= 5 && S.gens[0] >= 1;
       if ((tu.time >= CONFIG.tutorialSec && basics) || tu.time >= CONFIG.tutorialSec * 2) { tu.done = true; UI.hint(null); }
       return;
