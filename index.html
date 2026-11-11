@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1d1240">
+  <title>Монстроферма · Monster Ranch</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Яндекс Игры SDK (на платформе доступен по этому пути; локально — заглушка в game.js) -->
+  <script src="/sdk.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header id="top">
+      <div id="cur-box">
+        <div id="cur-ico" aria-hidden="true"><i></i></div>
+        <div class="cur-txt">
+          <div id="money">0</div>
+          <div id="pps">0</div>
+        </div>
+      </div>
+      <div id="boosts"></div>
+      <button id="btn-ads" class="ibtn" aria-label="bonus">🎁<i class="dot"></i></button>
+      <button id="btn-set" class="ibtn" aria-label="settings">⚙️</button>
+    </header>
+
+    <main id="main">
+      <section id="scene">
+        <canvas id="scene-cv"></canvas>
+        <div id="golden-layer"></div>
+        <div id="combo"><div id="combo-fill"></div><span id="combo-txt"></span></div>
+        <div id="hint" class="hidden"></div>
+      </section>
+      <section id="panel">
+        <div id="content"></div>
+        <nav id="tabs"></nav>
+      </section>
+    </main>
+
+    <canvas id="fx-cv"></canvas>
+    <div id="toasts"></div>
+    <div id="modal-root"></div>
+    <div id="adfake" class="hidden"></div>
+
+    <div id="loading">
+      <div class="ld-monster"><i class="e l"></i><i class="e r"></i><i class="m"></i></div>
+      <div class="ld-title">Монстроферма<br><small>Monster Ranch</small></div>
+      <div class="ld-bar"><i></i></div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
